@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/sh
 
 [ -z "$*" ] && printf "Enter a query: " && read -r query || query=$(printf "$*" | sed 's/\ /+/g' )
 search=$(curl -sL "https://www.youtube.com/results?search_query=${query}" | sed 's/},{/\n/g' | sed -nE 'N;N; s@.*\"videoRenderer\":\{\"videoId\":\"([a-zA-Z0-9_-]{11})\".*\"title\":\{\"runs\":\[\{\"text\":\"(.{1,100})\"\}\],.*@www.youtube.com/watch?v=\1 | \2@p')
