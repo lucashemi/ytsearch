@@ -1,11 +1,7 @@
 #!/bin/bash
 
-query=$(echo $* | sed 's/\ /+/g')
+[ -z "$*" ] && printf "Enter a query: " && read -r query || query=$(printf "$*" | sed 's/\ /+/g' )
 search=$(curl -sL "https://www.youtube.com/results?search_query=${query}" | sed 's/},{/\n/g' | sed -nE 'N;N; s@.*\"videoRenderer\":\{\"videoId\":\"([a-zA-Z0-9_-]{11})\".*\"title\":\{\"runs\":\[\{\"text\":\"(.{1,100})\"\}\],.*@www.youtube.com/watch?v=\1 | \2@p')
-url=$(echo "${search}" | dmenu -i -l 5)
-if [ -z "${url}" ]
-then
-    echo "Error: No video selected!"
-    exit
-fi
-${BROWSER} $(echo "${url}" | grep -Po '^.{35}')
+url=$(printf "${search}" | dmenu -i -l 5)
+[ -z "${url}" ] && printf "Error: No video selected!" && exit
+${BROWSER} $(printf "${url}" | grep -Po '^.{35}')
