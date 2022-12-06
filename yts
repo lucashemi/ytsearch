@@ -1,23 +1,11 @@
 #!/bin/bash
 
-query=$(echo $* | sed s/\ /+/g)
-search=$(curl -sL "www.youtube.com/results?search_query=${query}")
-watches=($(echo "$search" | grep -Po '"videoRenderer":{"videoId":"([a-zA-Z0-9_-]{11})' | awk -F: '{print $3}' | sed 's/^.//' | uniq | awk '{print "www.youtube.com/watch?v="$0}' | head -n5))
-titles=$(echo "$search" | grep -Po '"title":{"runs":\[{"text":.{1,100}"}\],' | awk -F: '{print $4}' | sed 's/....$//' | sed 's/.//' | head -n5)
-for ((i=0;i<5;i++))
-do
-    title[i]=$(echo "${titles}" | head -n$(echo "${i}+1" | bc)  | tail -n1)
-done
-lines=()
-space=" | "
-for ((i=0;i<${#watches[@]};i++))
-do 
-    lines+=${watches[i]}${space}${title[i]}$'\n'
-done
-url=$(echo "${lines[*]}" | dmenu -i -l 5)
+query=$(echo $* | sed 's/\ /+/g')
+search=$(curl -sL "https://www.youtube.com/results?search_query=${query}" | sed 's/},{/\n/g' | sed -nE 'N;N; s@.*\"videoRenderer\":\{\"videoId\":\"([a-zA-Z0-9_-]{11})\".*\"title\":\{\"runs\":\[\{\"text\":\"(.{1,100})\"\}\],.*@www.youtube.com/watch?v=\1 | \2@p')
+url=$(echo "${search}" | dmenu -i -l 5)
 if [ -z "${url}" ]
 then
     echo "Error: No video selected!"
-else
-    ${BROWSER} $(echo "${url}" | grep -Po '^.{35}')
+    exit
 fi
+${BROWSER} $(echo "${url}" | grep -Po '^.{35}')
