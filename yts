@@ -3,5 +3,5 @@
 query=$(printf "" | dmenu -p "Search: " | sed 's/\ /+/g' )
 videos=$(curl -sL "https://www.youtube.com/results?search_query=${query}" | sed 's/},{/\n/g' | sed -nE 'N;N; s@.*\"videoRenderer\":\{\"videoId\":\"(.{11})\".*\"title\":\{\"runs\":\[\{\"text\":\"(.{1,100})\"\}\],.*@https://www.youtube.com/watch?v=\1 | \2@p')
 url=$(printf "%s" "${videos}" | dmenu -i -l 15)
-[ -z "${url}" ] && exit
+[ -z "${url}" ] && exit 1
 ${BROWSER} "$(printf "%s" "${url}" | cut -d' ' -f1)"
